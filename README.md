@@ -3,7 +3,7 @@
 Full website made by HTML/CSS/JS/NodeJS & Lua.
 
 ## Execution
-runn `CMD` as admin, copy paste the following in the CMD: `node "%USERPROFILE%\Desktop\depo\server.js"` (USERPROFILE is you directory name)
+run `CMD` as admin, copy paste the following in the CMD: `node "%USERPROFILE%\Desktop\depo\server.js"` (USERPROFILE is you directory name)
 
 #
 
