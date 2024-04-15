@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Casino</title>
+    <style>
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div id="balance" class="balance"></div>
+        <input type="text" id="playerName" placeholder="Enter Player Name">
+        <input type="number" id="betAmount" placeholder="Enter Amount to Bet">
+        <div class="game-controls">
+            <button class="button" onclick="spinGame('REME')">REME</button>
+            <button class="button" onclick="spinGame('QQ')">QQ</button>
+            <button class="button" onclick="spinGame('CSN')">CSN</button>
+        </div>
+        <div id="game-info" class="game-info">Game:</div>
+        <div id="number-info">
+            <span id="userNumber" class="result"></span> - <span id="houseNumber" class="result"></span>
+        </div>
+        <div id="result" class="result"></div>
+    </div>
+
+    <div class="stars"></div>
+    
+    <script>
+        let balance = 0;
+
+        function updateBalance() {
+            fetch('/balance')
+                .then(response => response.json())
+                .then(data => {
+                    balance = data.balance;
+                    document.getElementById('balance').textContent = `Balance: ${balance}`;
+                })
+                .catch(error => {
+                    console.error('Error fetching balance:', error);
+                });
+        }
+
+        updateBalance();
+
+        function spinGame(game) {
+            const playerName = document.getElementById('playerName').value;
+            const betAmountInput = document.getElementById('betAmount');
+            const betAmount = parseInt(betAmountInput.value);
+
+            if (playerName.trim() === '' || isNaN(betAmount) || betAmount <= 0) {
+                alert('Please enter a valid player name and bet amount.');
+                return;
+            }
+
+            if (betAmount > balance) {
+                alert('Not enough balance.');
+                return;
+            }
+
+            function updateBalance(amount) {
+                fetch('/updateBalance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ amount })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to update balance');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    balance = data.balance;
+                    document.getElementById('balance').textContent = `Balance: ${balance}`;
+                })
+                .catch(error => {
+                    console.error('Error updating balance:', error.message);
+                    alert('Failed to update balance');
+                });
+            }
+
+            const userNumber = Math.floor(Math.random() * 37);
+            const houseNumber = Math.floor(Math.random() * 37);
+
+            document.getElementById('game-info').textContent = `Game: ${game}`;
+
+            let userNumberText, houseNumberText;
+            if (game === 'REME') {
+                userNumberText = `${userNumber} (${reme(userNumber)})`;
+                houseNumberText = `${houseNumber} (${reme(houseNumber)})`;
+            } else if (game === 'QQ') {
+                userNumberText = `${userNumber} (${qq(userNumber)})`;
+                houseNumberText = `${houseNumber} (${qq(houseNumber)})`;
+            } else if (game === 'CSN') {
+                userNumberText = userNumber.toString();
+                houseNumberText = houseNumber.toString();
+            }
+            document.getElementById('userNumber').textContent = `Your Number: ${userNumberText}`;
+            document.getElementById('houseNumber').textContent = `House Number: ${houseNumberText}`;
+
+            let result, resultClass;
+
+            if (game === 'REME') {
+                const userReme = reme(userNumber);
+                const houseReme = reme(houseNumber);
+
+                if (userReme === houseReme || houseReme === 0) {
+                    result = 'You Lose!';
+                    resultClass = 'lose';
+                    balance -= betAmount;
+                    updateBalance(-betAmount);
+                } else if (userReme === 0 && houseReme !== 0) {
+                    result = 'You Win!';
+                    resultClass = 'win';
+                    balance += betAmount * 2;
+                    updateBalance(betAmount * 2);
+                } else if (houseReme >= userReme) {
+                    result = 'You Lose!';
+                    resultClass = 'lose';
+                    balance -= betAmount;
+                    updateBalance(-betAmount);
+                } else {
+                    result = 'You Win!';
+                    resultClass = 'win';
+                    balance += betAmount * 2;
+                    updateBalance(betAmount * 2);
+                }
+            } else if (game === 'QQ') {
+                const userQQ = qq(userNumber);
+                const houseQQ = qq(houseNumber);
+
+                if (userQQ === houseQQ || houseQQ === 0) {
+                    result = 'You Lose!';
+                    resultClass = 'lose';
+                    balance -= betAmount;
+                    updateBalance(-betAmount);
+                } else if (userQQ === 0 && houseQQ !== 0) {
+                    result = 'You Win!';
+                    resultClass = 'win';
+                    balance += betAmount * 2;
+                    updateBalance(betAmount * 2);
+                } else if (houseQQ >= userQQ) {
+                    result = 'You Lose!';
+                    resultClass = 'lose';
+                    balance -= betAmount;
+                    updateBalance(-betAmount);
+                } else {
+                    result = 'You Win!';
+                    resultClass = 'win';
+                    balance += betAmount * 2;
+                    updateBalance(betAmount * 2);
+                }
+            } else if (game === 'CSN') {
+                if (userNumber === houseNumber || houseNumber === 0) {
+                    result = 'You Lose!';
+                    resultClass = 'lose';
+                    balance -= betAmount;
+                    updateBalance(-betAmount);
+                } else if (userNumber === 0 && houseNumber !== 0) {
+                    result = 'You Win!';
+                    resultClass = 'win';
+                    balance += betAmount * 3;
+                    updateBalance(betAmount * 3);
+                } else if (houseNumber >= userNumber) {
+                    result = 'You Lose!';
+                    resultClass = 'lose';
+                    balance -= betAmount;
+                    updateBalance(-betAmount);
+                } else {
+                    result = 'You Win!';
+                    resultClass = 'win';
+                    balance += betAmount * 2;
+                    updateBalance(betAmount * 2);
+                }
+            }
+
+            document.getElementById('result').textContent = result;
+            document.getElementById('result').className = resultClass;
+        }
+
+        function reme(num) {
+            let sum = 0;
+            while (num > 0) {
+                sum += num % 10;
+                num = Math.floor(num / 10);
+            }
+            return sum >= 10 ? 0 : sum;
+        }
+
+        function qq(num) {
+            return num === 0 ? 10 : num % 10;
+        }
+    </script>
+</body>
+</html>

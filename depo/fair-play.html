@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Spin Game</title>
+    <style>
+        .win {
+            color: green;
+        }
+
+        .lose {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <input type="text" id="playerName" placeholder="Enter Player Name">
+        <input type="number" id="betAmount" placeholder="Enter Amount to Bet">
+        <div class="game-controls">
+            <button class="button" onclick="testGame('REME')">Test REME</button>
+            <button class="button" onclick="testGame('QQ')">Test QQ</button>
+            <button class="button" onclick="testGame('CSN')">Test CSN</button>
+        </div>
+        <div id="game-info" class="game-info"></div>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="stars">
+        <script>
+            // Stars generation script
+        </script>
+    </div>
+    <script>
+        function testGame(game) {
+            const playerName = "Test Player";
+            const betAmount = 0;
+
+            const testResults = document.getElementById('test-results');
+            testResults.innerHTML = '';
+
+            let results = '';
+
+            if (game === 'REME') {
+                results += '<h3>REME Test Results</h3>';
+                for (let userNumber = 0; userNumber <= 36; userNumber++) {
+                    for (let houseNumber = 0; houseNumber <= 36; houseNumber++) {
+                        const userReme = reme(userNumber);
+                        const houseReme = reme(houseNumber);
+                        const resultClass = determineResult(userReme, houseReme);
+                        results += `<div class="${resultClass}">User: ${userNumber} (${userReme}) - House: ${houseNumber} (${houseReme}) - ${resultClass}</div>`;
+                    }
+                }
+            } else if (game === 'QQ') {
+                results += '<h3>QQ Test Results</h3>';
+                for (let userNumber = 0; userNumber <= 36; userNumber++) {
+                    for (let houseNumber = 0; houseNumber <= 36; houseNumber++) {
+                        const userQQ = qq(userNumber);
+                        const houseQQ = qq(houseNumber);
+                        const resultClass = determineResult(userQQ, houseQQ);
+                        results += `<div class="${resultClass}">User: ${userNumber} (${userQQ}) - House: ${houseNumber} (${houseQQ}) - ${resultClass}</div>`;
+                    }
+                }
+            } else if (game === 'CSN') {
+                results += '<h3>CSN Test Results</h3>';
+                for (let userNumber = 0; userNumber <= 36; userNumber++) {
+                    for (let houseNumber = 0; houseNumber <= 36; houseNumber++) {
+                        const resultClass = determineResult(userNumber, houseNumber);
+                        results += `<div class="${resultClass}">User: ${userNumber} - House: ${houseNumber} - ${resultClass}</div>`;
+                    }
+                }
+            }
+
+            testResults.innerHTML = results;
+        }
+
+        function determineResult(user, house) {
+            if (user === house || house === 0) {
+                return 'lose';
+            } else if (user === 0 && house !== 0) {
+                return 'win';
+            } else if (house >= user) {
+                return 'lose';
+            } else {
+                return 'win';
+            }
+        }
+
+        function reme(num) {
+            let sum = 0;
+            while (num > 0) {
+                sum += num % 10;
+                num = Math.floor(num / 10);
+            }
+            return sum >= 10 ? 0 : sum;
+        }
+
+        function qq(num) {
+            return num === 0 ? 10 : num % 10;
+        }
+    </script>
+</body>
+</html>
